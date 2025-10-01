@@ -62,9 +62,18 @@ type MySQLxQueries struct {
 	Get  string    `query:"get"`
 }
 
+type MyPGXQueries struct {
+	// These will be wrapped with pgxpool.
+	List *pgx.PreparedQuery `query:"list"`
+
+	// This will not be prepared.
+	Get  string    `query:"get"`
+}
+
 var (
-	q  MySQLQueries
-	qx MySQLxQueries
+	q   MySQLQueries
+	qx  MySQLxQueries
+	qpg MyPGXQueries
 )
 
 // Here, db (*sql.DB) is your live DB connection.
@@ -79,7 +88,14 @@ if err != nil {
 	log.Fatal(err)
 }
 
+// Here, pool (*pgxpool.Pool) is your live PGX connection pool.
+err := goyesqlpgx.ScanToStruct(&qpg, queries, pool)
+if err != nil {
+	log.Fatal(err)
+}
+
 // Then, q.Exec(), q.QueryRow() etc.
+// For pgx: qpg.List.QueryRow(), qpg.List.Query(), qpg.List.Exec()
 
 ```
 
